@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Task Flow</string>
+
+    <!-- Navigation -->
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_add">Add</string>
+    <string name="nav_calendar">Calendar</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Common Actions -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_back">Back</string>
+    <string name="action_search">Search</string>
+    <string name="action_filter">Filter</string>
+    <string name="action_sort">Sort</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_done">Done</string>
+    <string name="action_close">Close</string>
+
+    <!-- Task Fields -->
+    <string name="task_title">Task title</string>
+    <string name="task_title_required">Task title *</string>
+    <string name="task_description">Description</string>
+    <string name="task_category">Category</string>
+    <string name="task_priority">Priority</string>
+    <string name="task_due_date">Due date</string>
+    <string name="task_due_time">Due time</string>
+    <string name="task_tags">Tags</string>
+    <string name="task_subtasks">Subtasks</string>
+    <string name="task_reminder">Reminder</string>
+
+    <!-- Priority Levels -->
+    <string name="priority_high">High</string>
+    <string name="priority_medium">Medium</string>
+    <string name="priority_low">Low</string>
+    <string name="priority_all">All</string>
+
+    <!-- Task States -->
+    <string name="task_completed">Completed</string>
+    <string name="task_pending">Pending</string>
+    <string name="task_overdue">Overdue</string>
+
+    <!-- Search -->
+    <string name="search_tasks">Search tasks…</string>
+    <string name="search_placeholder">Search by title or description</string>
+    <string name="no_results_found">No tasks found</string>
+    <string name="clear_search">Clear search</string>
+
+    <!-- Empty States -->
+    <string name="empty_task_list">No tasks yet</string>
+    <string name="empty_task_list_description">Tap the + button to create your first task</string>
+    <string name="no_tasks_found">No tasks found</string>
+    <string name="no_subtasks">No subtasks</string>
+    <string name="no_tags">No tags</string>
+
+    <!-- Task Actions -->
+    <string name="add_task">Add Task</string>
+    <string name="edit_task">Edit Task</string>
+    <string name="delete_task">Delete Task</string>
+    <string name="save_task">Save Task</string>
+    <string name="complete_task">Complete Task</string>
+    <string name="uncomplete_task">Mark as Incomplete</string>
+    <string name="add_subtask">Add subtask</string>
+    <string name="add_tag">Add tag</string>
+
+    <!-- Validation Errors -->
+    <string name="error_title_empty">Title cannot be empty</string>
+    <string name="error_title_too_long">Title must be less than 100 characters</string>
+    <string name="error_description_too_long">Description must be less than 500 characters</string>
+    <string name="error_category_too_long">Category must be less than 50 characters</string>
+    <string name="error_tag_invalid">Tag can only contain letters, numbers, hyphens, and underscores</string>
+
+    <!-- Confirmation Dialogs -->
+    <string name="confirm_delete_task">Delete this task?</string>
+    <string name="confirm_delete_task_message">This action cannot be undone.</string>
+    <string name="confirm_delete_multiple">Delete %1$d tasks?</string>
+    <string name="confirm_complete_multiple">Mark %1$d tasks as complete?</string>
+
+    <!-- Sort Options -->
+    <string name="sort_date_asc">Date (Oldest first)</string>
+    <string name="sort_date_desc">Date (Newest first)</string>
+    <string name="sort_priority_high_first">Priority (High first)</string>
+    <string name="sort_priority_low_first">Priority (Low first)</string>
+    <string name="sort_title_a_to_z">Title (A to Z)</string>
+    <string name="sort_title_z_to_a">Title (Z to A)</string>
+    <string name="sort_by">Sort by</string>
+
+    <!-- Filter Options -->
+    <string name="filter_by_priority">Filter by priority</string>
+    <string name="filter_by_category">Filter by category</string>
+    <string name="show_completed">Show completed</string>
+    <string name="hide_completed">Hide completed</string>
+
+    <!-- Calendar -->
+    <string name="calendar_title">Calendar</string>
+    <string name="tasks_on_date">Tasks on %1$s</string>
+    <string name="no_tasks_on_date">No tasks on this date</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">Statistics</string>
+    <string name="stat_total_tasks">Total tasks</string>
+    <string name="stat_completed_tasks">Completed</string>
+    <string name="stat_pending_tasks">Pending</string>
+    <string name="stat_overdue_tasks">Overdue</string>
+    <string name="completion_trend">Completion trend</string>
+    <string name="completion_rate">Completion rate</string>
+    <string name="last_7_days">Last 7 days</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_dark_mode">Dark mode</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_enable_notifications">Enable notifications</string>
+    <string name="settings_notification_sound">Notification sound</string>
+    <string name="settings_data">Data</string>
+    <string name="settings_export">Export to CSV</string>
+    <string name="settings_clear_completed">Clear completed tasks</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_privacy">Privacy Policy</string>
+    <string name="settings_terms">Terms of Service</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_high">High Priority Tasks</string>
+    <string name="notification_channel_medium">Medium Priority Tasks</string>
+    <string name="notification_channel_low">Low Priority Tasks</string>
+    <string name="notification_task_reminder">Task Reminder</string>
+    <string name="notification_task_due">Task is due</string>
+
+    <!-- Date/Time -->
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="select_date">Select date</string>
+    <string name="select_time">Select time</string>
+
+    <!-- Accessibility -->
+    <string name="cd_task_checkbox">Task completion checkbox</string>
+    <string name="cd_task_options">Task options menu</string>
+    <string name="cd_priority_badge">Priority badge</string>
+    <string name="cd_category_chip">Category chip</string>
+    <string name="cd_search_icon">Search icon</string>
+    <string name="cd_filter_icon">Filter icon</string>
+    <string name="cd_sort_icon">Sort icon</string>
+    <string name="cd_back_button">Back button</string>
+    <string name="cd_close_button">Close button</string>
+
+    <!-- Success Messages -->
+    <string name="task_created">Task created</string>
+    <string name="task_updated">Task updated</string>
+    <string name="task_deleted">Task deleted</string>
+    <string name="tasks_deleted">%1$d tasks deleted</string>
+    <string name="tasks_completed">%1$d tasks completed</string>
+
+    <!-- Error Messages -->
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_loading_tasks">Failed to load tasks</string>
+    <string name="error_saving_task">Failed to save task</string>
+    <string name="error_deleting_task">Failed to delete task</string>
+
+    <!-- More Options -->
+    <string name="more_options">More options</string>
+    <string name="bulk_actions">Bulk actions</string>
+    <string name="selected_count">%1$d selected</string>
+</resources>
