@@ -10,19 +10,13 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Date
 
-/**
- * ViewModel for managing task list state and operations
- * Provides reactive state management with StateFlow
- */
 class TaskViewModel(
     private val repository: TaskRepository
 ) : ViewModel() {
 
-    // Search query state
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    // Filter states
     private val _filterPriority = MutableStateFlow<Priority?>(null)
     val filterPriority: StateFlow<Priority?> = _filterPriority.asStateFlow()
 
@@ -32,25 +26,18 @@ class TaskViewModel(
     private val _showCompleted = MutableStateFlow(true)
     val showCompleted: StateFlow<Boolean> = _showCompleted.asStateFlow()
 
-    // Sort option state
     private val _sortOption = MutableStateFlow(SortOption.DATE_DESC)
     val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
 
-    // Loading state
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // Error state
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    /**
-     * Combined flow of filtered and sorted tasks
-     * Reactively updates when any filter or sort option changes
-     */
     @OptIn(FlowPreview::class)
     val tasks: StateFlow<List<Task>> = combine(
-        _searchQuery.debounce(300), // Debounce search input
+        _searchQuery.debounce(300),
         _filterPriority,
         _filterCategory,
         _showCompleted,
@@ -59,12 +46,10 @@ class TaskViewModel(
     ) { query, priority, category, showCompleted, sort, allTasks ->
         var filteredTasks = allTasks
 
-        // Apply completion filter
         if (!showCompleted) {
             filteredTasks = filteredTasks.filter { !it.isCompleted }
         }
 
-        // Apply search filter
         if (query.isNotBlank()) {
             filteredTasks = filteredTasks.filter { task ->
                 task.title.contains(query, ignoreCase = true) ||
@@ -72,17 +57,14 @@ class TaskViewModel(
             }
         }
 
-        // Apply priority filter
         if (priority != null) {
             filteredTasks = filteredTasks.filter { it.priority == priority }
         }
 
-        // Apply category filter
         if (category != null) {
             filteredTasks = filteredTasks.filter { it.category == category }
         }
 
-        // Apply sorting
         when (sort) {
             SortOption.DATE_ASC -> filteredTasks.sortedBy { it.dueDate?.time ?: Long.MAX_VALUE }
             SortOption.DATE_DESC -> filteredTasks.sortedByDescending { it.dueDate?.time ?: 0 }
@@ -97,9 +79,6 @@ class TaskViewModel(
         initialValue = emptyList()
     )
 
-    /**
-     * Get all unique categories
-     */
     val categories: StateFlow<List<String>> = repository.getAllCategories()
         .stateIn(
             scope = viewModelScope,
@@ -107,9 +86,6 @@ class TaskViewModel(
             initialValue = emptyList()
         )
 
-    /**
-     * Update search query
-     */
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
         if (query.isNotBlank()) {
@@ -117,37 +93,32 @@ class TaskViewModel(
         }
     }
 
-    /**
-     * Set priority filter
-     */
     fun setFilterPriority(priority: Priority?) {
         _filterPriority.value = priority
     }
 
-    /**
-     * Set category filter
-     */
     fun setFilterCategory(category: String?) {
         _filterCategory.value = category
     }
 
-    /**
-     * Toggle show completed tasks
-     */
     fun toggleShowCompleted() {
         _showCompleted.value = !_showCompleted.value
     }
 
-    /**
-     * Set sort option
-     */
+    fun setShowCompleted(show: Boolean) {
+        _showCompleted.value = show
+    }
+
     fun setSortOption(option: SortOption) {
         _sortOption.value = option
     }
 
-    /**
-     * Insert a new task
-     */
+    fun clearFilters() {
+        _filterPriority.value = null
+        _filterCategory.value = null
+        _showCompleted.value = true
+    }
+
     fun insertTask(task: Task, onSuccess: (Long) -> Unit = {}) {
         viewModelScope.launch {
             try {
@@ -163,9 +134,6 @@ class TaskViewModel(
         }
     }
 
-    /**
-     * Update an existing task
-     */
     fun updateTask(task: Task, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             try {
@@ -181,9 +149,6 @@ class TaskViewModel(
         }
     }
 
-    /**
-     * Delete a task
-     */
     fun deleteTask(task: Task, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             try {
@@ -199,9 +164,6 @@ class TaskViewModel(
         }
     }
 
-    /**
-     * Toggle task completion status
-     */
     fun toggleTaskCompletion(taskId: Long, isCompleted: Boolean) {
         viewModelScope.launch {
             try {
@@ -212,22 +174,26 @@ class TaskViewModel(
         }
     }
 
-    /**
-     * Save search query to history
-     */
+    fun addTagsToTask(taskId: Long, tagNames: List<String>) {
+        viewModelScope.launch {
+            try {
+                repository.addTagsToTask(taskId, tagNames)
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to add tags"
+            }
+        }
+    }
+
     private fun saveSearchQuery(query: String) {
         viewModelScope.launch {
             try {
                 repository.saveSearch(query)
             } catch (e: Exception) {
-                // Silently fail for search history
+                // Silently fail
             }
         }
     }
 
-    /**
-     * Clear error message
-     */
     fun clearError() {
         _error.value = null
     }
