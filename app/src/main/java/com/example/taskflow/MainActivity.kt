@@ -12,29 +12,32 @@ import com.example.taskflow.data.repository.TaskRepository
 import com.example.taskflow.ui.TaskFlowApp
 import com.example.taskflow.ui.theme.TaskFlowTheme
 
-/**
- * Main activity for Task Flow application
- * Sets up the app with Material 3 theme and navigation
- */
 class MainActivity : ComponentActivity() {
 
     private lateinit var preferencesManager: PreferencesManager
+    private lateinit var taskRepository: TaskRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize preferences manager
         preferencesManager = PreferencesManager(applicationContext)
 
-        // Enable edge-to-edge display
+        val database = AppDatabase.getInstance(applicationContext)
+        taskRepository = TaskRepository(
+            taskDao = database.taskDao(),
+            subtaskDao = database.subtaskDao(),
+            tagDao = database.tagDao(),
+            reminderDao = database.reminderDao(),
+            searchHistoryDao = database.searchHistoryDao()
+        )
+
         enableEdgeToEdge()
 
         setContent {
-            // Collect dark mode preference
             val darkMode by preferencesManager.darkMode.collectAsState(initial = false)
 
             TaskFlowTheme(darkTheme = darkMode) {
-                TaskFlowApp()
+                TaskFlowApp(repository = taskRepository)
             }
         }
     }
