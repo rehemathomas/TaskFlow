@@ -9,17 +9,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.example.taskflow.ui.screens.*
+import com.example.taskflow.viewmodel.TaskViewModel
 
-/**
- * Main navigation graph for Task Flow
- * Defines all navigation routes and their corresponding composables
- *
- * @param navController Navigation controller for managing navigation
- * @param modifier Modifier to be applied to the NavHost
- */
 @Composable
 fun NavGraph(
     navController: NavHostController,
+    viewModel: TaskViewModel,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -27,9 +22,9 @@ fun NavGraph(
         startDestination = Route.Tasks,
         modifier = modifier
     ) {
-        // Tasks List Screen
         composable(route = Route.Tasks) {
             TaskListScreen(
+                viewModel = viewModel,
                 onTaskClick = { taskId ->
                     navController.navigate(Route.taskDetail(taskId))
                 },
@@ -39,9 +34,9 @@ fun NavGraph(
             )
         }
 
-        // Add Task Screen
         composable(route = Route.Add) {
             AddTaskScreen(
+                viewModel = viewModel,
                 onNavigateBack = {
                     navController.popBackStack()
                 },
@@ -51,7 +46,27 @@ fun NavGraph(
             )
         }
 
-        // Task Detail Screen with arguments
+        composable(
+            route = Route.EditTaskWithArgs,
+            arguments = listOf(
+                navArgument("taskId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getLong("taskId") ?: 0L
+            AddTaskScreen(
+                viewModel = viewModel,
+                editTaskId = taskId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onTaskSaved = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
         composable(
             route = Route.TaskDetailWithArgs,
             arguments = listOf(
@@ -68,32 +83,31 @@ fun NavGraph(
             val taskId = backStackEntry.arguments?.getLong("taskId") ?: 0L
             TaskDetailScreen(
                 taskId = taskId,
+                viewModel = viewModel,
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onEditTask = {
-                    // Navigate to edit mode (same screen, different state)
+                onEditTask = { id ->
+                    navController.navigate(Route.editTask(id))
                 }
             )
         }
 
-        // Calendar Screen
         composable(route = Route.Calendar) {
             CalendarScreen(
+                viewModel = viewModel,
                 onTaskClick = { taskId ->
                     navController.navigate(Route.taskDetail(taskId))
                 }
             )
         }
 
-        // Statistics Screen
         composable(route = Route.Stats) {
-            StatsScreen()
+            StatsScreen(viewModel = viewModel)
         }
 
-        // Settings Screen
         composable(route = Route.Settings) {
-            SettingsScreen()
+            SettingsScreen(viewModel = viewModel)
         }
     }
 }
