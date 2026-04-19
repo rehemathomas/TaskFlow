@@ -11,48 +11,122 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.taskflow.data.entity.Task
-import com.example.taskflow.ui.components.EmptyState
-import com.example.taskflow.ui.components.SearchBarWithSuggestions
-import com.example.taskflow.ui.components.TaskCard
+import com.example.taskflow.ui.components.*
+import com.example.taskflow.viewmodel.TaskViewModel
+import kotlinx.coroutines.launch
 
-/**
- * Main task list screen
- * Displays all tasks with search, filter, and sort capabilities
- *
- * @param onTaskClick Callback when a task is clicked
- * @param onAddClick Callback when add button is clicked
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
+    viewModel: TaskViewModel,
     onTaskClick: (Long) -> Unit,
     onAddClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // TODO: Get ViewModel instance
-    // val viewModel: TaskViewModel = viewModel()
-    // val tasks by viewModel.tasks.collectAsState()
-    // val searchQuery by viewModel.searchQuery.collectAsState()
-    // val isLoading by viewModel.isLoading.collectAsState()
+    val tasks by viewModel.tasks.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val categories by viewModel.categories.collectAsState()
+    val filterPriority by viewModel.filterPriority.collectAsState()
+    val filterCategory by viewModel.filterCategory.collectAsState()
+    val showCompleted by viewModel.showCompleted.collectAsState()
+    val sortOption by viewModel.sortOption.collectAsState()
+    val totalCount by viewModel.totalTaskCount.collectAsState()
 
-    // Temporary state for UI preview
-    var searchQuery by remember { mutableStateOf("") }
     var showFilterSheet by remember { mutableStateOf(false) }
     var showSortSheet by remember { mutableStateOf(false) }
-    val tasks = remember { emptyList<Task>() }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is com.example.taskflow.viewmodel.UiEvent.ShowMessage -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+                is com.example.taskflow.viewmodel.UiEvent.ShowError -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = SnackbarDuration.Long
+                    )
+                }
+                is com.example.taskflow.viewmodel.UiEvent.TaskDeleted -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "Task deleted",
+                        actionLabel = "Undo",
+                        duration = SnackbarDuration.Long
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.restoreTask(event.task)
+                    }
+                }
+            }
+        }
+    }
+
+    if (showFilterSheet) {
+        FilterBottomSheet(
+            selectedPriority = filterPriority,
+            selectedCategory = filterCategory,
+            categories = categories,
+            showCompleted = showCompleted,
+            onPrioritySelected = { viewModel.setFilterPriority(it) },
+            onCategorySelected = { viewModel.setFilterCategory(it) },
+            onShowCompletedChanged = { viewModel.setShowCompleted(it) },
+            onDismiss = { showFilterSheet = false }
+        )
+    }
+
+    if (showSortSheet) {
+        SortBottomSheet(
+            currentSort = sortOption,
+            onSortSelected = { viewModel.setSortOption(it) },
+            onDismiss = { showSortSheet = false }
+        )
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Task Flow") },
+                title = {
+                    Column {
+                        Text("Task Flow")
+                        if (totalCount > 0) {
+                            val shown = tasks.size
+                            Text(
+                                text = if (viewModel.hasActiveFilters() && shown != totalCount) {
+                                    "$shown of $totalCount tasks"
+                                } else {
+                                    "$totalCount task${if (totalCount != 1) "s" else ""}"
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
                 actions = {
+                    if (viewModel.hasActiveFilters()) {
+                        TextButton(onClick = { viewModel.clearFilters() }) {
+                            Text("Clear", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
                     IconButton(onClick = { showFilterSheet = true }) {
                         Icon(
                             imageVector = Icons.Default.FilterList,
-                            contentDescription = "Filter tasks"
+                            contentDescription = "Filter tasks",
+                            tint = if (filterPriority != null || filterCategory != null || !showCompleted) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            }
                         )
                     }
                     IconButton(onClick = { showSortSheet = true }) {
@@ -82,38 +156,55 @@ fun TaskListScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Search bar
             SearchBarWithSuggestions(
                 query = searchQuery,
-                onQueryChange = { searchQuery = it },
-                onSearch = { /* viewModel.updateSearchQuery(it) */ },
+                onQueryChange = { viewModel.updateSearchQuery(it) },
+                onSearch = { viewModel.updateSearchQuery(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            // Task list
-            if (tasks.isEmpty()) {
-                EmptyState(
-                    message = "No tasks yet",
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(
-                        items = tasks,
-                        key = { it.id }
-                    ) { task ->
-                        TaskCard(
-                            task = task,
-                            onClick = { onTaskClick(task.id) },
-                            onCheckedChange = { /* viewModel.toggleTaskCompletion(task.id, it) */ },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                tasks.isEmpty() -> {
+                    EmptyState(
+                        message = if (viewModel.hasActiveFilters()) {
+                            "No tasks match your filters"
+                        } else {
+                            "No tasks yet — tap Add Task to get started"
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                else -> {
+                    LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(
+                            items = tasks,
+                            key = { it.id }
+                        ) { task ->
+                            TaskCard(
+                                task = task,
+                                onClick = { onTaskClick(task.id) },
+                                onCheckedChange = { checked ->
+                                    viewModel.toggleTaskCompletion(task.id, checked)
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
             }
