@@ -11,9 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.taskflow.viewmodel.SortOption
 
-/**
- * Bottom sheet for selecting sort option
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SortBottomSheet(
@@ -37,7 +34,7 @@ fun SortBottomSheet(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
             )
 
-            Divider()
+            HorizontalDivider()
 
             SortOption.entries.forEach { option ->
                 SortOptionItem(
