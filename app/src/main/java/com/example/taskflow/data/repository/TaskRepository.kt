@@ -2,6 +2,7 @@ package com.example.taskflow.data.repository
 
 import com.example.taskflow.data.dao.*
 import com.example.taskflow.data.entity.*
+import com.example.taskflow.utils.DateUtils
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
@@ -33,14 +34,29 @@ class TaskRepository(
 
     fun getAllCategories(): Flow<List<String>> = taskDao.getAllCategories()
 
-    fun getTasksByDate(date: Date): Flow<List<Task>> =
-        taskDao.getTasksByDate(date.time)
+    fun getTasksByDate(startOfDay: Long, endOfDay: Long): Flow<List<Task>> =
+        taskDao.getTasksByDate(startOfDay, endOfDay)
+
+    fun getTasksByDate(date: Date): Flow<List<Task>> {
+        val start = DateUtils.getStartOfDay(date).time
+        val end = DateUtils.getEndOfDay(date).time
+        return taskDao.getTasksByDate(start, end)
+    }
 
     fun getOverdueTasks(): Flow<List<Task>> =
         taskDao.getOverdueTasks(System.currentTimeMillis())
 
     fun getTasksInDateRange(startDate: Date, endDate: Date): Flow<List<Task>> =
         taskDao.getTasksInDateRange(startDate.time, endDate.time)
+
+    fun getTotalTaskCount(): Flow<Int> = taskDao.getTotalTaskCount()
+
+    fun getPendingTaskCount(): Flow<Int> = taskDao.getPendingTaskCount()
+
+    fun getCompletedTaskCount(): Flow<Int> = taskDao.getCompletedTaskCount()
+
+    fun getOverdueTaskCount(): Flow<Int> =
+        taskDao.getOverdueTaskCount(System.currentTimeMillis())
 
     suspend fun insertTask(task: Task): Long = taskDao.insertTask(task)
 
