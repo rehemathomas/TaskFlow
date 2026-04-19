@@ -22,20 +22,49 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :taskId")
     fun getTaskById(taskId: Long): Flow<Task?>
 
-    @Query("SELECT * FROM tasks WHERE title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%' ORDER BY createdAt DESC")
+    @Query("""
+        SELECT * FROM tasks 
+        WHERE title LIKE '%' || :query || '%' 
+           OR description LIKE '%' || :query || '%' 
+        ORDER BY createdAt DESC
+    """)
     fun searchTasks(query: String): Flow<List<Task>>
 
     @Query("SELECT DISTINCT category FROM tasks WHERE category IS NOT NULL ORDER BY category ASC")
     fun getAllCategories(): Flow<List<String>>
 
-    @Query("SELECT * FROM tasks WHERE dueDate = :date ORDER BY dueTime ASC")
-    fun getTasksByDate(date: Long): Flow<List<Task>>
+    @Query("""
+        SELECT * FROM tasks 
+        WHERE dueDate BETWEEN :startOfDay AND :endOfDay 
+        ORDER BY dueTime ASC
+    """)
+    fun getTasksByDate(startOfDay: Long, endOfDay: Long): Flow<List<Task>>
 
-    @Query("SELECT * FROM tasks WHERE dueDate < :currentTime AND isCompleted = 0 ORDER BY dueDate ASC")
+    @Query("""
+        SELECT * FROM tasks 
+        WHERE dueDate < :currentTime AND isCompleted = 0 
+        ORDER BY dueDate ASC
+    """)
     fun getOverdueTasks(currentTime: Long): Flow<List<Task>>
 
-    @Query("SELECT * FROM tasks WHERE dueDate BETWEEN :startDate AND :endDate ORDER BY dueDate ASC, dueTime ASC")
+    @Query("""
+        SELECT * FROM tasks 
+        WHERE dueDate BETWEEN :startDate AND :endDate 
+        ORDER BY dueDate ASC, dueTime ASC
+    """)
     fun getTasksInDateRange(startDate: Long, endDate: Long): Flow<List<Task>>
+
+    @Query("SELECT COUNT(*) FROM tasks WHERE isCompleted = 0")
+    fun getPendingTaskCount(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM tasks WHERE isCompleted = 1")
+    fun getCompletedTaskCount(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM tasks WHERE dueDate < :currentTime AND isCompleted = 0")
+    fun getOverdueTaskCount(currentTime: Long): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM tasks")
+    fun getTotalTaskCount(): Flow<Int>
 
     @Transaction
     @Query("SELECT * FROM tasks WHERE id = :taskId")
@@ -66,9 +95,6 @@ interface TaskDao {
     suspend fun completeTasks(taskIds: List<Long>, completedAt: Long)
 }
 
-/**
- * Data class combining task with subtasks and tags
- */
 data class TaskWithDetails(
     @Embedded val task: Task,
 
